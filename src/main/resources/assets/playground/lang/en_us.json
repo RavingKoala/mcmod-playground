@@ -1,0 +1,13 @@
+{
+  "itemGroup.playground": "Example Mod Tab",
+  "block.playground.example_block": "Example Block",
+  "item.playground.example_item": "Example Item",
+
+  "playground.configuration.title": "Example Mod Configs",
+  "playground.configuration.section.playground.common.toml": "Example Mod Configs",
+  "playground.configuration.section.playground.common.toml.title": "Example Mod Configs",
+  "playground.configuration.items": "Item List",
+  "playground.configuration.logDirtBlock": "Log Dirt Block",
+  "playground.configuration.magicNumberIntroduction": "Magic Number Text",
+  "playground.configuration.magicNumber": "Magic Number"
+}
