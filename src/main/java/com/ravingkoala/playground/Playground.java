@@ -1,7 +1,14 @@
 package com.ravingkoala.playground;
 
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -10,10 +17,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -47,8 +50,7 @@ public class Playground {
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_food", new Item.Properties().food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
 
-
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("playground_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.playground"))
             .withTabsBefore(CreativeModeTabs.COMBAT)
             .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
@@ -102,5 +104,36 @@ public class Playground {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("HELLO from server starting");
+    }
+
+    @SubscribeEvent
+    public void onAttackEntity(AttackEntityEvent event) {
+        Player player = event.getEntity();
+        ItemStack heldItem = player.getMainHandItem();
+        if (heldItem.getItem() != Items.FEATHER)
+            return;
+
+        event.setCanceled(true);
+        if (player.getAttackStrengthScale(0.0f) < 1)
+            return;
+
+        Entity target = event.getTarget();
+
+        // next 3 lines: essentially just removes the y-axis and sets the length back to 1 (and keeping the direction negative values friendly)
+        Vec3 pushDirection = new Vec3(player.getLookAngle().x , 0, player.getLookAngle().z);
+        double normalizeMultiplier = 1/pushDirection.length();
+        Vec3 normalizedDirection = pushDirection.multiply(normalizeMultiplier, 0, normalizeMultiplier);
+
+        double muliplier = 0.6d;
+        if (player.isCrouching() || player.hasEffect(MobEffects.SLOWNESS))
+            muliplier -= 0.3d;
+        if (player.isSprinting())
+            muliplier += 0.2d;
+
+        Vec3 pushEffectMultiplier = normalizedDirection.multiply(muliplier, 0, muliplier);
+
+        Vec3 pushEffect = pushEffectMultiplier.add(0, 0.2, 0);
+
+        target.push(pushEffect);
     }
 }
