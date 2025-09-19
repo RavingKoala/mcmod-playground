@@ -61,8 +61,6 @@ public class Playground {
 
     public Playground(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::clientSetup);
-        modEventBus.addListener(this::serverSetup);
 
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
@@ -85,14 +83,6 @@ public class Playground {
         LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
 
         Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
-    }
-
-    private void serverSetup(FMLDedicatedServerSetupEvent event) {
-        LOGGER.info("HELLO FROM SERVER SETUP");
-    }
-
-    private void clientSetup(FMLClientSetupEvent event) {
-        LOGGER.info("HELLO FROM CLIENT SETUP");
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
